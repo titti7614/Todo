@@ -1,0 +1,208 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f4f6f9;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 750px;
+    margin: 0 auto;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    color: #2c3e50;
+    margin-top: 0;
+}
+
+.project-badge-top {
+    display: inline-block;
+    background: #e67e22;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.selector-box {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.selector-section {
+    display: flex;
+    align-items: center;
+}
+
+.selector-box select {
+    padding: 5px;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.creation-section-inline {
+    display: flex;
+    gap: 5px;
+}
+
+.creation-section-inline input[type="text"] {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.zone-formulaires {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.bloc-form {
+    background: #eef2f7;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.form-ligne {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+}
+
+.btn-green {
+    background: #27ae60;
+}
+
+.btn-green:hover {
+    background: #219653;
+}
+
+.btn-blue {
+    background: #3498db;
+}
+
+.btn-blue:hover {
+    background: #2980b9;
+}
+
+.btn-orange {
+    background: #e67e22;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
+.btn-orange:hover {
+    background: #d35400;
+}
+
+.tache-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.tache-item:last-child {
+    border-bottom: none;
+}
+
+.done {
+    color: #95a5a6;
+    text-decoration: line-through;
+    font-style: italic;
+}
+
+.badge-phase {
+    background: #3498db;
+    color: white;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 120px;
+    text-align: center;
+}
+
+.btn-check {
+    text-decoration: none;
+    color: #27ae60;
+    font-weight: bold;
+    border: 1px solid #27ae60;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.btn-check:hover {
+    background: #27ae60;
+    color: white;
+}
+
+/* Bouton de suppression de tâche individuelle */
+.btn-delete-task {
+    text-decoration: none;
+    color: #e74c3c;
+    font-weight: bold;
+    border: 1px solid #e74c3c;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-delete-task:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Conteneur d'actions pour aligner les boutons horizontalement */
+.actions-tache {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
