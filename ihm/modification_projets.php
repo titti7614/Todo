@@ -13,12 +13,14 @@
     <?php endif; ?>
     
     <form action="index.php" method="POST">
-        <input type="hidden" name="action" value="modification_projet">
+        <input type="hidden" name="action" value="modification_projets">
         <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">
         
         <div class="form-ligne">
             <label for="nouveau_nom_projet">Nouveau nom du projet :</label>
-            <input type="text" name="nouveau_nom_projet" id="nouveau_nom_projet" value="<?php echo htmlspecialchars($nom_actuel, ENT_QUOTES, 'UTF-8'); ?>" required>
+        <!-- 🎯 CORRECTIF : On extrait le nom directement depuis le tableau $projet_a_modifier préparé par l'index -->
+<input type="text" name="nouveau_nom_projet" id="nouveau_nom_projet" value="<?php echo !empty($projet_a_modifier['nom_projet']) ? htmlspecialchars($projet_a_modifier['nom_projet'], ENT_QUOTES, 'UTF-8') : ''; ?>" required>
+    
         </div>
         
         <div style="display: flex; gap: 10px; margin-top: 15px;">

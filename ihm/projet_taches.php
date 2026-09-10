@@ -1,6 +1,6 @@
 <?php
 // 1. Appel du fichier de service (ajustez le chemin si nécessaire)
-require_once __DIR__ . '/../services/projet_tache.php'; 
+// require_once __DIR__ . '/../services/projet_tache.php'; 
 
 
 // 2. Récupération de la liste des projets via la fonction du service

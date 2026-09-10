@@ -13,18 +13,18 @@ function getTousProjets($lien) {
     return $projets;
 }
 
-function getPhasesParProjet($lien, $projet_id) {
-    $phases = [];
-    $projet_id = (int)$projet_id;
-    $query = "SELECT id, nom FROM todo_phases WHERE projet_id = $projet_id ORDER BY nom ASC";
-    $result = mysqli_query($lien, $query);
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $phases[] = $row;
-        }
-    }
-    return $phases;
-}
+// function getPhasesParProjet($lien, $projet_id) {
+//     $phases = [];
+//     $projet_id = (int)$projet_id;
+//     $query = "SELECT id, nom FROM todo_phases WHERE projet_id = $projet_id ORDER BY nom ASC";
+//     $result = mysqli_query($lien, $query);
+//     if ($result) {
+//         while ($row = mysqli_fetch_assoc($result)) {
+//             $phases[] = $row;
+//         }
+//     }
+//     return $phases;
+// }
 
 function getProjetParId($lien, $projet_id) {
     $projet_id = (int)$projet_id;

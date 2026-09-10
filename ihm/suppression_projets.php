@@ -1,5 +1,5 @@
 <?php
-// ihm/suppression_projet.php
+// ihm/suppression_projets.php
 // Ce fichier ne contient plus AUCUNE logique PHP de base de données, uniquement de l'affichage.
 
 $nom_projet_a_supprimer = "Projet inconnu";
@@ -18,7 +18,7 @@ if (!empty($projet_a_supprimer)) {
     <!-- CORRECTION : Le formulaire pointe vers l'index de base, l'action est passée en méthode POST sécurisée -->
     <form action="index.php" method="POST" style="margin-top: 20px;">
         <!-- On passe l'action et l'ID du projet en champs cachés -->
-        <input type="hidden" name="action" value="suppression_projet">
+        <input type="hidden" name="action" value="suppression_projets">
         <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">
         
         <div style="display: flex; gap: 10px;">
