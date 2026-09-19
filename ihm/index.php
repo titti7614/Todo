@@ -29,55 +29,46 @@ $action = isset($_GET['action']) ? trim($_GET['action']) : (isset($_POST['action
 $nom_fichier_actuel = basename($_SERVER['PHP_SELF']);
 
 // 6. --- INTERCEPTION DU TRAITEMENT DES FORMULAIRES (POST / ACTIONS LOGIQUES) ---
-// Action : Ajouter un projet
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'ajout_projets') {
     require_once __DIR__ . '/../services/ajouter_projets.php';
     exit();
 }
 
-// Action : Modifier un projet
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'modification_projets') {
     require_once __DIR__ . '/../services/modifier_projets.php';
     exit();
 }
 
-// Action : Supprimer un projet
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'suppression_projets') {
     require_once __DIR__ . '/../services/supprimer_projets.php';
     exit();
 }
 
-// Action : Ajouter une phase
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'ajout_phases') {
     require_once __DIR__ . '/../services/ajouter_phases.php';
     exit();
 }
 
-// Action : Ajouter une tâche (Harmonisé au pluriel)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'ajout_taches') {
     require_once __DIR__ . '/../services/ajouter_taches.php';
     exit();
 }
 
-// Action : Enregistrement de la modification d'une phase (POST uniquement)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'modification_phases' && isset($_POST['nom_phase'])) {
     require_once __DIR__ . '/../services/modifier_phases.php';
     exit();
 }
 
-// Action : Validation finale de suppression d'une phase (POST uniquement)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'suppression_phase_confirmee') {
     require_once __DIR__ . '/../services/supprimer_phases.php';
     exit();
 }
 
-// Action : Gère la modification tâche (POST uniquement)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'modification_taches' || $action === 'modification_tache')) {
     require_once __DIR__ . '/../services/modifier_taches.php';
     exit();
 }
 
-// Action : Cocher / Décocher une tâche (Bascule dynamique du statut 0 <-> 1)
 if (($action === 'cocher_tache' || $action === 'cocher') && isset($_GET['id_tache'])) {
     $id_tache_a_cocher = (int)$_GET['id_tache'];
     $sql_cocher = "UPDATE todo_taches SET statut = IF(statut = 1, 0, 1) WHERE id = $id_tache_a_cocher";
@@ -87,13 +78,10 @@ if (($action === 'cocher_tache' || $action === 'cocher') && isset($_GET['id_tach
     exit();
 }
 
-// 🎯 CORRECTIF CHIRURGICAL : L'ancien bloc GET bloquant a disparu.
-// Seule la validation finale provenant du gros bouton rouge (POST) exécute le script SQL.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'suppression_tache_confirmee') {
     require_once __DIR__ . '/../services/supprimer_taches.php';
     exit();
 }
-
 
 // 7. --- EXTRACTEURS DES MESSAGES DE SESSIONS ET PARAMÈTRES GLOBAUX ---
 $message_erreur_projet = null;
@@ -115,16 +103,11 @@ $doublon_nom = isset($_GET['dup_nom']) ? trim($_GET['dup_nom']) : "";
 $liste_tous_projets = getTousProjets($lien);
 $list_phases = $projet_id ? getPhasesParProjet($lien, $projet_id) : [];
 
-// Interception des filtres multiples (Cases à cocher)
 $phases_selectionnees = (isset($_GET['phases_filtre']) && is_array($_GET['phases_filtre'])) ? $_GET['phases_filtre'] : [];
-
-// 🎯 INTERCEPTION DE LA BARRE DE RECHERCHE TEXTUELLE
 $recherche_mot_cle = isset($_GET['recherche_texte']) ? trim($_GET['recherche_texte']) : '';
 
-// Chargement des tâches adaptées aux filtres multiples ET au mot-clé recherché
 $resultat = $projet_id ? getTachesParProjet($lien, $projet_id, $phases_selectionnees, $recherche_mot_cle) : null;
 
-// 🎯 CORRECTIF : Charge la tâche aussi bien en modification qu'en demande de suppression graphique (GET)
 $tache_a_modifier = ((isset($_GET['id_tache']) || isset($_POST['id_tache'])) && ($action === 'modification_taches' || $action === 'modification_tache' || $action === 'suppression_tache')) ? getTachePourModification($lien, isset($_GET['id_tache']) ? (int)$_GET['id_tache'] : (int)$_POST['id_tache']) : null;
 
 $phase_id_contexte = isset($_REQUEST['phase_id']) ? (int)$_REQUEST['phase_id'] : 0;
@@ -140,22 +123,32 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
     <title>Mon Central To-Do Multi-Projets</title>
     <link rel="stylesheet" type="text/css" href="../lib/style.css">
 </head>
+
 <body>
 
 <div class="container" style="position: relative;">
     
-    <!-- 🏷️ Badge de Version 1.0 -->
-    <div style="position: absolute; top: 10px; right: 10px; background: #64748b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-        v1.0
+    <!-- 🎯 🏷️ PASSAGE EN VERSION v2.0 -->
+    <div style="position: absolute; top: 10px; right: 10px; background: #2ecc71; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+        v2.0
     </div>
 
     <h1>📋 Central To-Do Multi-Projets</h1>
 
-    <!-- BARRE GLOBALE : Choix du projet actif et formulaire rapide -->
-    <div class="selector-box" style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between;">
-        <div class="selector-section">
+    <!-- BARRE GLOBALE : Choix du projet actif, Bouton Accueil v2.0 et formulaire rapide -->
+    <div class="selector-box" style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+        <div class="selector-section" style="display: flex; align-items: center; gap: 10px;">
+            
+            <!-- 🎯 LE NOUVEAU BOUTON ACCUEIL : Réinitialise l'action, la recherche et les phases cochées -->
+            <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=liste" 
+               title="Réinitialiser les filtres et revenir à la liste complète" 
+               style="display: inline-flex; align-items: center; justify-content: center; background: #34495e; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; height: 32px; box-sizing: border-box; transition: background 0.2s;"
+               onmouseover="this.style.background='#2c3e50'" onmouseout="this.style.background='#34495e'">
+               🏠 Accueil
+            </a>
+
             <label for="proj_select"><strong>Projet actif :</strong></label>
-            <select id="proj_select" onchange="window.location.href='<?php echo $nom_fichier_actuel; ?>?projet_id='+this.value;" style="padding: 5px; min-width: 200px;">
+            <select id="proj_select" onchange="window.location.href='<?php echo $nom_fichier_actuel; ?>?projet_id='+this.value;" style="padding: 5px; min-width: 200px; height: 32px;">
                 <option value="0">-- Choisir un projet --</option>
                 <?php if (!empty($liste_tous_projets)): ?>
                     <?php foreach ($liste_tous_projets as $p): ?>
@@ -167,9 +160,9 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
             </select>
         </div>
 
-        <form action="<?php echo $nom_fichier_actuel; ?>?action=ajout_projets" method="POST" class="creation-section-inline">
-            <input type="text" name="nom_projet" placeholder="Nom du nouveau projet..." required style="padding: 5px; width: 200px;">
-            <button type="submit" name="ajouter_projet" class="btn-orange" style="background: #e67e22; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Créer</button>
+        <form action="<?php echo $nom_fichier_actuel; ?>?action=ajout_projets" method="POST" class="creation-section-inline" style="margin: 0; display: flex; gap: 5px;">
+            <input type="text" name="nom_projet" placeholder="Nom du nouveau projet..." required style="padding: 5px; width: 200px; height: 32px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <button type="submit" name="ajouter_projet" class="btn-orange" style="background: #e67e22; color: white; padding: 0 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; height: 32px;">+ Créer</button>
         </form>
     </div>
 
@@ -259,7 +252,6 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
                 include __DIR__ . '/modification_taches.php';
                 break;
             
-            // 🎯 CORRECTIF : Inclusion de l'IHM graphique d'avertissement rouge
             case 'suppression_tache':
                 include __DIR__ . '/suppression_taches.php';
                 break;

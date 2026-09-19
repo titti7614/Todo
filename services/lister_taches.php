@@ -2,7 +2,7 @@
 // services/lister_taches.php
 
 /**
- * 1. Récupère les tâches d'un projet avec double filtrage : multi-phases ET recherche textuelle
+ * 1. Récupère les tâches d'un projet avec double filtrage et tri intelligent (en cours d'abord)
  */
 function getTachesParProjet($lien, $projet_id, $phases_ids = [], $recherche_texte = '') {
     $projet_id = (int)$projet_id;
@@ -12,21 +12,21 @@ function getTachesParProjet($lien, $projet_id, $phases_ids = [], $recherche_text
             LEFT JOIN todo_phases p ON t.phase_id = p.id
             WHERE t.projet_id = $projet_id";
             
-    // 🎯 FILTRE 1 : Multi-phases (Cases à cocher)
+    // FILTRE 1 : Multi-phases (Cases à cocher)
     if (!empty($phases_ids) && is_array($phases_ids)) {
         $phases_nettoyees = array_map('intval', $phases_ids);
         $liste_in_sql = implode(',', $phases_nettoyees);
         $sql .= " AND t.phase_id IN ($liste_in_sql)";
     }
     
-    // 🎯 FILTRE 2 : Barre de recherche textuelle
+    // FILTRE 2 : Barre de recherche textuelle
     if (!empty($recherche_texte)) {
         $recherche_sec = mysqli_real_escape_string($lien, $recherche_texte);
-        // Cherche le mot-clé n'importe où dans le texte de la tâche
         $sql .= " AND t.texte LIKE '%$recherche_sec%'";
     }
     
-    $sql .= " ORDER BY t.id ASC";
+    // 🎯 TRI INTELLIGENT : Statut 0 (en cours) d'abord, puis statut 1 (fait), et enfin par ID du plus récent au plus ancien
+    $sql .= " ORDER BY t.statut ASC, t.id DESC";
             
     return mysqli_query($lien, $sql);
 }

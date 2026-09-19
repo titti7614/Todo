@@ -1,17 +1,43 @@
 <?php
 // ihm/liste_taches.php
 // Reçoit de l'index : la ressource brute mysqli_result $resultat et l'entier $projet_id
+
+$taches_tableau = [];
+$total_taches = 0;
+$taches_en_cours = 0;
+
+// 🎯 CALCUL DU COMPTEUR : On stocke les résultats dans un tableau et on compte les statuts
+if ($resultat && mysqli_num_rows($resultat) > 0) {
+    while ($row = mysqli_fetch_assoc($resultat)) {
+        $taches_tableau[] = $row;
+        $total_taches++;
+        if ($row['statut'] == 0) {
+            $taches_en_cours++;
+        }
+    }
+}
 ?>
-<h2>Liste des tâches</h2>
+
+<!-- En-tête avec titre et compteurs dynamiques -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+    <h2 style="margin: 0; color: #1e293b;">Liste des tâches</h2>
+    
+    <?php if ($total_taches > 0): ?>
+        <div style="font-size: 0.9rem; font-weight: bold; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; color: #475569; border: 1px solid #cbd5e1;">
+            ⏳ En cours : <span style="color: #e67e22;"><?php echo $taches_en_cours; ?></span> 
+            / Total : <span style="color: #3498db;"><?php echo $total_taches; ?></span>
+        </div>
+    <?php endif; ?>
+</div>
+
 <div class="liste-taches">
-    <?php if ($resultat && mysqli_num_rows($resultat) > 0): ?>
-        <?php while ($tache = mysqli_fetch_assoc($resultat)): ?>
+    <?php if (!empty($taches_tableau)): ?>
+        <?php foreach ($taches_tableau as $tache): ?>
             <!-- Conteneur principal de la ligne de tâche -->
-            <div class="tache-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #eee; gap: 20px;">
+            <div class="tache-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #eee; gap: 20px; background: <?php echo ($tache['statut'] == 1) ? '#f8fafc' : '#fff'; ?>;">
                 
                 <!-- Colonne 1 : Badge de phase et texte de la tâche -->
                 <div style="flex: 1;">
-                    <!-- Rendu dynamique utilisant couleur_phase et nom_phase extraits de la BDD -->
                     <span class="badge-phase" style="display: inline-block; background: <?php echo !empty($tache['couleur_phase']) ? htmlspecialchars($tache['couleur_phase'], ENT_QUOTES, 'UTF-8') : '#e67e22'; ?>; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; margin-right: 10px; margin-bottom: 5px; vertical-align: middle; font-weight: bold;">
                         <?php echo !empty($tache['nom_phase']) ? htmlspecialchars($tache['nom_phase'], ENT_QUOTES, 'UTF-8') : 'Général'; ?>
                     </span>
@@ -20,11 +46,11 @@
                     </span>
                 </div>
                 
-                <!-- Colonne 2 : Zone des boutons d'actions (Alignée horizontalement) -->
+                <!-- Colonne 2 : Zone des boutons d'actions -->
                 <div class="actions-tache" style="display: flex; flex-direction: row; gap: 10px; align-items: center; justify-content: flex-end; flex-shrink: 0;">
                     
                     <?php if ($tache['statut'] == 0): ?>
-                        <!-- Bouton Modifier (Largeur fixe pour l'alignement vertical) -->
+                        <!-- Bouton Modifier -->
                         <div style="width: 95px; flex-shrink: 0; text-align: center;">
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=modification_taches&id_tache=<?php echo $tache['id']; ?>" 
                                class="btn-check" 
@@ -33,7 +59,7 @@
                             </a>
                         </div>
                         
-                        <!-- Bouton Fait (Largeur fixe) -->
+                        <!-- Bouton Fait -->
                         <div style="width: 95px; flex-shrink: 0; text-align: center;">
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=cocher_tache&id_tache=<?php echo $tache['id']; ?>" 
                                class="btn-check" 
@@ -42,7 +68,7 @@
                             </a>
                         </div>
                     <?php else: ?>
-                        <!-- Si la tâche est terminée, le bouton Rétablir prend la place disponible -->
+                        <!-- Bouton Rétablir -->
                         <div style="width: 200px; flex-shrink: 0; text-align: center;">
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=cocher_tache&id_tache=<?php echo $tache['id']; ?>" 
                                class="btn-undo" 
@@ -52,7 +78,7 @@
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Bouton Supprimer épuré (Pointe directement sur l'écran d'avertissement rouge) -->
+                    <!-- Bouton Supprimer épuré -->
                     <div style="width: 35px; flex-shrink: 0; text-align: center;">
                         <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=suppression_tache&id_tache=<?php echo $tache['id']; ?>" 
                            style="display: inline-block; text-decoration: none; font-size: 1rem; padding: 4px 0;" 
@@ -63,8 +89,8 @@
 
                 </div>
             </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     <?php else: ?>
-        <p style="color: #7f8c8d; font-style: italic; text-align: center; padding: 20px 0;">Aucune tâche enregistrée pour ce projet.</p>
+        <p style="color: #7f8c8d; font-style: italic; text-align: center; padding: 20px 0;">Aucune tâche enregistrée pour ce projet ou correspondant à vos filtres.</p>
     <?php endif; ?>
 </div>
