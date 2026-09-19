@@ -8,10 +8,10 @@
 function getTachesParProjet($lien, $projet_id) {
     $projet_id = (int)$projet_id;
     
-    // 🎯 CORRECTIF : Ajout de p.couleur AS couleur_phase dans le SELECT
+    // 🎯 HARMONISATION : Remplacement de t.phase par t.phase_id pour la liaison SQL
     $sql = "SELECT t.id, t.texte, t.statut, p.nom AS nom_phase, p.couleur AS couleur_phase 
             FROM todo_taches t
-            LEFT JOIN todo_phases p ON t.phase = p.id
+            LEFT JOIN todo_phases p ON t.phase_id = p.id
             WHERE t.projet_id = $projet_id 
             ORDER BY t.id ASC";
             
@@ -20,19 +20,19 @@ function getTachesParProjet($lien, $projet_id) {
 
 
 /**
- * 2. Récupère les données d'une seule tâche alignées sur vos vraies colonnes (id, projet_id, phase, texte, statut)
+ * 2. Récupère les données d'une seule tâche alignées sur la nouvelle colonne (phase_id)
  */
 function getTachePourModification($lien, $id_tache) {
     $id_tache = (int)$id_tache;
     
-    // 🎯 ALIGNEMENT BDD : On extrait la colonne 'phase' réelle de votre table
-    $sql = "SELECT id, projet_id, phase, texte, statut FROM todo_taches WHERE id = $id_tache LIMIT 1";
+    // 🎯 HARMONISATION : Remplacement de la colonne 'phase' obsolète par 'phase_id'
+    $sql = "SELECT id, projet_id, phase_id, texte, statut FROM todo_taches WHERE id = $id_tache LIMIT 1";
     $resultat = mysqli_query($lien, $sql);
     
-    if ($resultat && mysqli_num_rows($resultat) > 0) {
+    if ($resultat && mysqli_num_rows($res_check = $resultat) > 0) {
         $donnees = mysqli_fetch_assoc($resultat);
         mysqli_free_result($resultat);
-        return $donnees; // Renvoie le tableau contenant les vraies clés lues par l'IHM
+        return $donnees; // Renvoie le tableau contenant les clés lues par l'IHM
     }
     
     return null;

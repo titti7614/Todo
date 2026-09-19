@@ -66,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'modification_phases' &
 }
 
 
-// Action : Enregistrement de la modification d'une tâche (POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'modification_taches') {
+// 🎯 CORRECTIF : Gère l'action au singulier et au pluriel provenant du formulaire POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'modification_taches' || $action === 'modification_tache')) {
     require_once __DIR__ . '/../services/modifier_taches.php';
     exit();
 }
@@ -112,13 +112,16 @@ $resultat = $projet_id ? getTachesParProjet($lien, $projet_id) : null;
 // Sécurisation du pré-remplissage pour les formulaires de modification (GET ou POST)
 $tache_a_modifier = (isset($_GET['id_tache']) && function_exists('getTachePourModification')) ? getTachePourModification($lien, (int)$_GET['id_tache']) : null;
 
-// 🎯 CAPTURE SÉCURISÉE EN REQUEST : Attrape l'ID que l'IHM l'envoie en GET ou en POST
+// 🎯 CAPTURE SÉCURISÉE EN REQUEST : Attrape l'ID que l'IHM envoie en GET ou en POST
 $phase_id_contexte = isset($_REQUEST['phase_id']) ? (int)$_REQUEST['phase_id'] : 0;
 $phase_a_modifier = ($action === 'modification_phases' && $phase_id_contexte > 0 && function_exists('getPhasePourModification')) ? getPhasePourModification($lien, $phase_id_contexte) : null;
 // 🎯 CORRECTIF : Remplacement de 'suppression_projets' par 'suppression_projet' (au singulier)
 $projet_a_supprimer = ($action === 'suppression_projets' && $projet_id > 0) ? getProjetParId($lien, $projet_id) : null;
+// 🎯 CORRECTIF : Extraction des données du projet pour alimenter l'IHM de modification (Renommer)
+$projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? getProjetParId($lien, $projet_id) : null;
 
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -128,7 +131,7 @@ $projet_a_supprimer = ($action === 'suppression_projets' && $projet_id > 0) ? ge
 </head>
 <body>
 
-<div class="container" style="position: relative;"> <!-- 🎯 Ajout de position: relative pour caler le badge -->
+<div class="container" style="position: relative;">
     
     <!-- 🏷️ Badge de Version 1.0 -->
     <div style="position: absolute; top: 10px; right: 10px; background: #64748b; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
@@ -181,7 +184,7 @@ $projet_a_supprimer = ($action === 'suppression_projets' && $projet_id > 0) ? ge
         </div>
     <?php endif; ?>
 
-    <!-- 🎯 9. BARRE D'ACTIONS TECHNIQUE DU PROJET (Garantit la visibilité permanente du bouton d'ajout au pluriel) -->
+    <!-- 9. BARRE D'ACTIONS TECHNIQUE DU PROJET -->
     <?php if ($projet_id > 0 && $action === 'liste'): ?>
         <div class="barre-outils-projet" style="margin-top: 15px; margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px dashed #3498db;">
             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=ajout_taches" class="btn-blue" style="display: inline-block; background: #3498db; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">
@@ -228,17 +231,16 @@ $projet_a_supprimer = ($action === 'suppression_projets' && $projet_id > 0) ? ge
                 break;
                 
             case 'modification_phases':
-                // 🎯 CORRECTIF : Assurez-vous que ce nom correspond EXACTEMENT au nom de votre fichier dans le dossier ihm/
-                // Si votre fichier s'appelle modification_tache.php ou modification_phases.php, écrivez son nom exact ici :
                 include __DIR__ . '/modification_phases.php'; 
                 break;
 
-            // --- COMPOSANTS IHM TÂCHES (Synchronisé au pluriel) ---
+            // --- COMPOSANTS IHM TÂCHES (Gère singulier et pluriel pour l'affichage) ---
             case 'ajout_taches':
                 include __DIR__ . '/ajout_taches.php';
                 break;
                 
             case 'modification_taches':
+            case 'modification_tache': 
                 include __DIR__ . '/modification_taches.php';
                 break;
 

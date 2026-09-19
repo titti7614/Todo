@@ -18,13 +18,26 @@
                        required style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
 
-            <!-- 🎯 NOUVEAU Champ 2 : Choix de la couleur à la création -->
+            <!-- 🎯 NOUVEAU : Palette de couleur en quadrillage épuré (Style LibreOffice) -->
             <div class="form-group" style="margin-bottom: 15px;">
-                <label for="couleur_phase" style="display:block; font-weight:bold; margin-bottom:5px;">Couleur de la phase :</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="color" name="couleur_phase" id="couleur_phase" value="#e67e22" 
-                           style="width: 50px; height: 40px; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; padding: 0;">
-                    <span style="font-size: 0.9rem; color: #64748b;">Choisissez une couleur pour cette phase</span>
+                <label style="display:block; font-weight:bold; margin-bottom:8px;">Couleur de la phase :</label>
+                
+                <!-- Champ caché qui transmettra la valeur sélectionnée -->
+                <input type="hidden" name="couleur_phase" id="couleur_phase" value="#e67e22">
+                
+                <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_phase">
+                    <div data-color="#e67e22" style="background: #e67e22; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 2px #e67e22; transform: scale(1.1);" title="Orange"></div>
+                    <div data-color="#34495e" style="background: #34495e; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Gris Ardoise"></div>
+                    <div data-color="#2ecc71" style="background: #2ecc71; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Vert"></div>
+                    <div data-color="#3498db" style="background: #3498db; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Bleu"></div>
+                    <div data-color="#9b59b6" style="background: #9b59b6; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Violet"></div>
+                    <div data-color="#e74c3c" style="background: #e74c3c; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Rouge"></div>
+                    <div data-color="#f1c40f" style="background: #f1c40f; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Jaune"></div>
+                    <div data-color="#1abc9c" style="background: #1abc9c; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Turquoise"></div>
+                    <div data-color="#2c3e50" style="background: #2c3e50; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Sombre"></div>
+                    <div data-color="#7f8c8d" style="background: #7f8c8d; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Gris"></div>
+                    <div data-color="#d35400" style="background: #d35400; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Brique"></div>
+                    <div data-color="#27ae60" style="background: #27ae60; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Vert Foncé"></div>
                 </div>
             </div>
 
@@ -36,3 +49,21 @@
         </form>
     </div>
 </div>
+
+<script>
+// Gestion de l'activation graphique des pastilles de couleur
+document.querySelectorAll('#palette_quadrillage_phase > div').forEach(function(pastille) {
+    pastille.addEventListener('click', function() {
+        var couleur = this.getAttribute('data-color');
+        document.getElementById('couleur_phase').value = couleur;
+        
+        document.querySelectorAll('#palette_quadrillage_phase > div').forEach(function(p) {
+            p.style.transform = "scale(1)";
+            p.style.boxShadow = "0 0 0 1px #cbd5e1";
+        });
+        
+        this.style.transform = "scale(1.1)";
+        this.style.boxShadow = "0 0 0 2px " + couleur;
+    });
+});
+</script>
