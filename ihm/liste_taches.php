@@ -1,15 +1,15 @@
 <?php
 // ihm/liste_taches.php
-// Reçoit de l'index : la ressource $resultat et le $projet_id
+// Reçoit de l'index : la ressource brute mysqli_result $resultat et l'entier $projet_id
 ?>
 <h2>Liste des tâches</h2>
 <div class="liste-taches">
     <?php if ($resultat && mysqli_num_rows($resultat) > 0): ?>
         <?php while ($tache = mysqli_fetch_assoc($resultat)): ?>
-            <!-- Conteneur principal de la ligne -->
+            <!-- Conteneur principal de la ligne de tâche -->
             <div class="tache-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #eee; gap: 20px;">
                 
-                <!-- Colonne 1 : Zone de texte (Prend tout le reste de l'espace à gauche) -->
+                <!-- Colonne 1 : Badge de phase et texte de la tâche -->
                 <div style="flex: 1;">
                     <!-- Rendu dynamique utilisant couleur_phase et nom_phase extraits de la BDD -->
                     <span class="badge-phase" style="display: inline-block; background: <?php echo !empty($tache['couleur_phase']) ? htmlspecialchars($tache['couleur_phase'], ENT_QUOTES, 'UTF-8') : '#e67e22'; ?>; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; margin-right: 10px; margin-bottom: 5px; vertical-align: middle; font-weight: bold;">
@@ -20,11 +20,11 @@
                     </span>
                 </div>
                 
-                <!-- 🎯 Zone des Actions : Alignée sur la même ligne (row), centrée verticalement -->
+                <!-- Colonne 2 : Zone des boutons d'actions (Alignée horizontalement) -->
                 <div class="actions-tache" style="display: flex; flex-direction: row; gap: 10px; align-items: center; justify-content: flex-end; flex-shrink: 0;">
                     
                     <?php if ($tache['statut'] == 0): ?>
-                        <!-- Colonne Bouton Modifier (Largeur fixe de 95px pour l'alignement vertical) -->
+                        <!-- Bouton Modifier (Largeur fixe pour l'alignement vertical) -->
                         <div style="width: 95px; flex-shrink: 0; text-align: center;">
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=modification_taches&id_tache=<?php echo $tache['id']; ?>" 
                                class="btn-check" 
@@ -33,7 +33,7 @@
                             </a>
                         </div>
                         
-                        <!-- Colonne Bouton Fait (Largeur fixe de 95px) -->
+                        <!-- Bouton Fait (Largeur fixe) -->
                         <div style="width: 95px; flex-shrink: 0; text-align: center;">
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=cocher_tache&id_tache=<?php echo $tache['id']; ?>" 
                                class="btn-check" 
@@ -42,7 +42,7 @@
                             </a>
                         </div>
                     <?php else: ?>
-                        <!-- Si la tâche est faite, le bouton Rétablir prend la place des colonnes Modifier + Fait -->
+                        <!-- Si la tâche est terminée, le bouton Rétablir prend la place disponible -->
                         <div style="width: 200px; flex-shrink: 0; text-align: center;">
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=cocher_tache&id_tache=<?php echo $tache['id']; ?>" 
                                class="btn-undo" 
@@ -52,12 +52,11 @@
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Colonne Bouton Supprimer (Largeur fixe de 35px) -->
+                    <!-- Bouton Supprimer épuré (Pointe directement sur l'écran d'avertissement rouge) -->
                     <div style="width: 35px; flex-shrink: 0; text-align: center;">
                         <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=suppression_tache&id_tache=<?php echo $tache['id']; ?>" 
-                           onclick="return confirm('Supprimer définitivement ?');" 
                            style="display: inline-block; text-decoration: none; font-size: 1rem; padding: 4px 0;" 
-                           title="Supprimer">
+                           title="Supprimer la tâche">
                            ❌
                         </a>
                     </div>

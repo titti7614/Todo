@@ -65,8 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'modification_phases' &
     exit();
 }
 
+// Action : Validation finale de suppression d'une phase (POST uniquement)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'suppression_phase_confirmee') {
+    require_once __DIR__ . '/../services/supprimer_phases.php';
+    exit();
+}
 
-// 🎯 CORRECTIF : Gère l'action au singulier et au pluriel provenant du formulaire POST
+// Action : Gère la modification tâche (POST uniquement)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($action === 'modification_taches' || $action === 'modification_tache')) {
     require_once __DIR__ . '/../services/modifier_taches.php';
     exit();
@@ -82,11 +87,13 @@ if (($action === 'cocher_tache' || $action === 'cocher') && isset($_GET['id_tach
     exit();
 }
 
-// Action : Supprimer une tâche
-if ($action === 'suppression_tache') {
+// 🎯 CORRECTIF CHIRURGICAL : L'ancien bloc GET bloquant a disparu.
+// Seule la validation finale provenant du gros bouton rouge (POST) exécute le script SQL.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'suppression_tache_confirmee') {
     require_once __DIR__ . '/../services/supprimer_taches.php';
     exit();
 }
+
 
 // 7. --- EXTRACTEURS DES MESSAGES DE SESSIONS ET PARAMÈTRES GLOBAUX ---
 $message_erreur_projet = null;
@@ -107,21 +114,20 @@ $doublon_nom = isset($_GET['dup_nom']) ? trim($_GET['dup_nom']) : "";
 // 8. --- PRÉPARATION DES DONNÉES DISPONIBLES POUR L'IHM (SERVICES DE LECTURE) ---
 $liste_tous_projets = getTousProjets($lien);
 $list_phases = $projet_id ? getPhasesParProjet($lien, $projet_id) : [];
-$resultat = $projet_id ? getTachesParProjet($lien, $projet_id) : null;
 
-// Sécurisation du pré-remplissage pour les formulaires de modification (GET ou POST)
-$tache_a_modifier = (isset($_GET['id_tache']) && function_exists('getTachePourModification')) ? getTachePourModification($lien, (int)$_GET['id_tache']) : null;
+// Interception des filtres multiples (Cases à cocher)
+$phases_selectionnees = (isset($_GET['phases_filtre']) && is_array($_GET['phases_filtre'])) ? $_GET['phases_filtre'] : [];
+$resultat = $projet_id ? getTachesParProjet($lien, $projet_id, $phases_selectionnees) : null;
 
-// 🎯 CAPTURE SÉCURISÉE EN REQUEST : Attrape l'ID que l'IHM envoie en GET ou en POST
+// 🎯 CORRECTIF : Charge la tâche aussi bien en modification qu'en demande de suppression graphique (GET)
+$tache_a_modifier = ((isset($_GET['id_tache']) || isset($_POST['id_tache'])) && ($action === 'modification_taches' || $action === 'modification_tache' || $action === 'suppression_tache')) ? getTachePourModification($lien, isset($_GET['id_tache']) ? (int)$_GET['id_tache'] : (int)$_POST['id_tache']) : null;
+
 $phase_id_contexte = isset($_REQUEST['phase_id']) ? (int)$_REQUEST['phase_id'] : 0;
-$phase_a_modifier = ($action === 'modification_phases' && $phase_id_contexte > 0 && function_exists('getPhasePourModification')) ? getPhasePourModification($lien, $phase_id_contexte) : null;
-// 🎯 CORRECTIF : Remplacement de 'suppression_projets' par 'suppression_projet' (au singulier)
+$phase_a_modifier = (($action === 'modification_phases' || $action === 'suppression_phase') && $phase_id_contexte > 0 && function_exists('getPhasePourModification')) ? getPhasePourModification($lien, $phase_id_contexte) : null;
+
 $projet_a_supprimer = ($action === 'suppression_projets' && $projet_id > 0) ? getProjetParId($lien, $projet_id) : null;
-// 🎯 CORRECTIF : Extraction des données du projet pour alimenter l'IHM de modification (Renommer)
 $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? getProjetParId($lien, $projet_id) : null;
-
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -179,7 +185,7 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
             <span style="font-weight: bold;">📁 Projet actif : <?php echo htmlspecialchars($nom_projet_courant, ENT_QUOTES, 'UTF-8'); ?></span>
             <div>
                 <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=modification_projets" style="color: white; text-decoration: none; background: #3498db; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; margin-right: 5px; font-weight: bold;">✏️ Renommer</a>
-                <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=suppression_projets" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">🗑️ Supprimer le projet</a>
+                <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=suppression_projets" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">🗑️ Supprimer le projet</a>
             </div>
         </div>
     <?php endif; ?>
@@ -234,7 +240,11 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
                 include __DIR__ . '/modification_phases.php'; 
                 break;
 
-            // --- COMPOSANTS IHM TÂCHES (Gère singulier et pluriel pour l'affichage) ---
+            case 'suppression_phase':
+                include __DIR__ . '/suppression_phases.php';
+                break;
+
+            // --- COMPOSANTS IHM TÂCHES ---
             case 'ajout_taches':
                 include __DIR__ . '/ajout_taches.php';
                 break;
@@ -242,6 +252,11 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
             case 'modification_taches':
             case 'modification_tache': 
                 include __DIR__ . '/modification_taches.php';
+                break;
+            
+            // 🎯 CORRECTIF : Inclusion de l'IHM graphique d'avertissement rouge
+            case 'suppression_tache':
+                include __DIR__ . '/suppression_taches.php';
                 break;
 
             // --- VUE PAR DÉFAUT ---
