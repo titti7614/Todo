@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <!-- 3. Champ masqué pour créer la phase à la volée avec le quadrillage LibreOffice -->
+        <!-- 3. Champ masqué pour créer la phase à la volée avec le quadrillage -->
         <div id="bloc_nouvelle_phase_ajout" style="display: none; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-left: 4px solid #2ecc71; border-radius: 4px;">
             <div style="margin-bottom: 12px;">
                 <label for="nouveau_nom_phase" style="display: block; font-weight: bold; margin-bottom: 5px; color: #27ae60;">Nom de la nouvelle phase :</label>
@@ -43,6 +43,7 @@
             <!-- Quadrillage pastilles de couleur -->
             <div>
                 <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #27ae60;">Couleur de la phase :</label>
+                <!-- 🎯 FIX HIERARCHIE : L'ID est unique et le NAME est exactement synchronisé avec le POST PHP -->
                 <input type="hidden" name="nouvelle_couleur_phase" id="nouvelle_couleur_phase_ajout" value="#e67e22">
                 
                 <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_ajout">
@@ -72,7 +73,7 @@
 </div>
 
 <script>
-// Toggle affichage bloc masqué
+// Menu déroulant <=> champ masqué
 document.getElementById('btn_declencher_phase_ajout').addEventListener('click', function(e) {
     e.preventDefault();
     var bloc = document.getElementById('bloc_nouvelle_phase_ajout');
@@ -91,7 +92,7 @@ document.getElementById('btn_declencher_phase_ajout').addEventListener('click', 
     }
 });
 
-// Animation pastilles quadrillage
+// 🎯 FIX DE L'ÉCOUTEUR JS : Ciblage strict des enfants du conteneur unique de ce fichier
 document.querySelectorAll('#palette_quadrillage_ajout > div').forEach(function(pastille) {
     pastille.addEventListener('click', function() {
         var couleur = this.getAttribute('data-color');

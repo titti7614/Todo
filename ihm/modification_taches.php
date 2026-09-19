@@ -46,7 +46,7 @@ else:
                 </div>
             </div>
 
-            <!-- 3. Champ masqué à la volée avec le quadrillage LibreOffice -->
+            <!-- 3. Champ masqué à la volée avec le quadrillage -->
             <div id="bloc_nouvelle_phase_modif" style="display: none; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-left: 4px solid #2ecc71; border-radius: 4px;">
                 <div style="margin-bottom: 10px;">
                     <label for="nouveau_nom_phase" style="display: block; font-weight: bold; margin-bottom: 5px; color: #27ae60;">Nom de la nouvelle phase :</label>
@@ -55,6 +55,7 @@ else:
                 
                 <div>
                     <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #27ae60;">Couleur de la phase :</label>
+                    <!-- 🎯 FIX HIERARCHIE : Utilisation d'un ID de destination distinct pour le script modif -->
                     <input type="hidden" name="nouvelle_couleur_phase" id="nouvelle_couleur_phase_modif" value="#34495e">
                     
                     <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_modif">
@@ -103,7 +104,7 @@ document.getElementById('btn_declencher_phase_modif').addEventListener('click', 
     }
 });
 
-// Animation pastilles
+// 🎯 FIX DE L'ÉCOUTEUR JS : Ciblage strict du conteneur de modification
 document.querySelectorAll('#palette_quadrillage_modif > div').forEach(function(pastille) {
     pastille.addEventListener('click', function() {
         var couleur = this.getAttribute('data-color');

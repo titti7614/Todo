@@ -10,6 +10,8 @@ if (!$phase_a_modifier):
     <p><a href="index.php?projet_id=<?php echo $projet_id; ?>&action=liste" class="btn-blue">Retour</a></p>
 <?php 
 else: 
+    // Récupération de la couleur actuelle ou orange par défaut
+    $couleur_actuelle = !empty($phase_a_modifier['couleur']) ? $phase_a_modifier['couleur'] : '#e67e22';
 ?>
 <div class="zone-formulaires" style="margin-top: 20px;">
     <div class="bloc-form" style="background: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1;">
@@ -28,14 +30,24 @@ else:
                        required style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
 
-            <!-- 🎯 Champ 2 : Modification de la couleur existante -->
+            <!-- 🎯 NOUVEAU : Palette LibreOffice en quadrillage pour la modification -->
             <div class="form-group" style="margin-bottom: 15px;">
-                <label for="couleur_phase" style="display:block; font-weight:bold; margin-bottom:5px;">Couleur de la phase :</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="color" name="couleur_phase" id="couleur_phase" 
-                           value="<?php echo !empty($phase_a_modifier['couleur']) ? htmlspecialchars($phase_a_modifier['couleur'], ENT_QUOTES, 'UTF-8') : '#e67e22'; ?>" 
-                           style="width: 50px; height: 40px; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; padding: 0;">
-                    <span style="font-size: 0.9rem; color: #64748b;">Cliquez sur le carré pour changer la couleur</span>
+                <label style="display:block; font-weight:bold; margin-bottom:8px;">Couleur de la phase :</label>
+                
+                <!-- Champ caché contenant la couleur -->
+                <input type="hidden" name="couleur_phase" id="couleur_phase_modif_ecran" value="<?php echo htmlspecialchars($couleur_actuelle, ENT_QUOTES, 'UTF-8'); ?>">
+                
+                <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_modif_ecran">
+                    <?php
+                    // Liste des 12 couleurs LibreOffice disponibles
+                    $couleurs = ['#e67e22', '#34495e', '#2ecc71', '#3498db', '#9b59b6', '#e74c3c', '#f1c40f', '#1abc9c', '#2c3e50', '#7f8c8d', '#d35400', '#27ae60'];
+                    foreach ($couleurs as $c):
+                        $est_active = ($c === $couleur_actuelle);
+                    ?>
+                        <div data-color="<?php echo $c; ?>" 
+                             style="background: <?php echo $c; ?>; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: <?php echo $est_active ? '0 0 0 2px ' . $c : '0 0 0 1px #cbd5e1'; ?>; transform: <?php echo $est_active ? 'scale(1.1)' : 'scale(1)'; ?>;" 
+                             title="<?php echo $c; ?>"></div>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -47,4 +59,22 @@ else:
         </form>
     </div>
 </div>
+
+<script>
+// Gestion de la sélection visuelle du quadrillage
+document.querySelectorAll('#palette_quadrillage_modif_ecran > div').forEach(function(pastille) {
+    pastille.addEventListener('click', function() {
+        var couleur = this.getAttribute('data-color');
+        document.getElementById('couleur_phase_modif_ecran').value = couleur;
+        
+        document.querySelectorAll('#palette_quadrillage_modif_ecran > div').forEach(function(p) {
+            p.style.transform = "scale(1)";
+            p.style.boxShadow = "0 0 0 1px #cbd5e1";
+        });
+        
+        this.style.transform = "scale(1.1)";
+        this.style.boxShadow = "0 0 0 2px " + couleur;
+    });
+});
+</script>
 <?php endif; ?>
