@@ -2,12 +2,13 @@
 // services/lister_taches.php
 
 /**
- * 1. Récupère les tâches d'un projet avec double filtrage et tri intelligent (en cours d'abord)
+ * 1. Récupère les tâches d'un projet avec double filtrage, tri intelligent ET chargement du champ note (v3.0)
  */
 function getTachesParProjet($lien, $projet_id, $phases_ids = [], $recherche_texte = '') {
     $projet_id = (int)$projet_id;
     
-    $sql = "SELECT t.id, t.texte, t.statut, p.nom AS nom_phase, p.couleur AS couleur_phase 
+    // 🎯 REQUÊTE UNIFIÉE v3.0 : Contient t.note de manière indiscutable
+    $sql = "SELECT t.id, t.texte, t.statut, t.note, p.nom AS nom_phase, p.couleur AS couleur_phase 
             FROM todo_taches t
             LEFT JOIN todo_phases p ON t.phase_id = p.id
             WHERE t.projet_id = $projet_id";
@@ -25,7 +26,7 @@ function getTachesParProjet($lien, $projet_id, $phases_ids = [], $recherche_text
         $sql .= " AND t.texte LIKE '%$recherche_sec%'";
     }
     
-    // 🎯 TRI INTELLIGENT : Statut 0 (en cours) d'abord, puis statut 1 (fait), et enfin par ID du plus récent au plus ancien
+    // TRI INTELLIGENT v3.0 : En cours d'abord, puis par ID décroissant
     $sql .= " ORDER BY t.statut ASC, t.id DESC";
             
     return mysqli_query($lien, $sql);
