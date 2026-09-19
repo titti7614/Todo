@@ -1,40 +1,35 @@
 <?php
 // services/lister_taches.php
-// Fonctions de lecture pures - Aucun HTML ici
 
 /**
- * 1. Récupère les tâches d'un projet, avec un filtrage optionnel multi-phases
- * @param mysqli $lien Connexion à la BDD
- * @param int $projet_id ID du projet actif
- * @param array $phases_ids Tableau contenant les IDs des phases cochées
+ * 1. Récupère les tâches d'un projet avec double filtrage : multi-phases ET recherche textuelle
  */
-function getTachesParProjet($lien, $projet_id, $phases_ids = []) {
+function getTachesParProjet($lien, $projet_id, $phases_ids = [], $recherche_texte = '') {
     $projet_id = (int)$projet_id;
     
-    // Base de la requête SQL avec jointure harmonisée
     $sql = "SELECT t.id, t.texte, t.statut, p.nom AS nom_phase, p.couleur AS couleur_phase 
             FROM todo_taches t
             LEFT JOIN todo_phases p ON t.phase_id = p.id
             WHERE t.projet_id = $projet_id";
             
-    // 🎯 FILTRAGE DYNAMIQUE MULTI-PHASES
-    // Si l'utilisateur a coché au moins une phase, on restreint les résultats
+    // 🎯 FILTRE 1 : Multi-phases (Cases à cocher)
     if (!empty($phases_ids) && is_array($phases_ids)) {
-        // Sécurisation de chaque ID pour éviter les injections SQL
         $phases_nettoyees = array_map('intval', $phases_ids);
-        
-        // Construction de la liste séparée par des virgules (ex: "3,7,12")
         $liste_in_sql = implode(',', $phases_nettoyees);
-        
-        // On ajoute la condition à la requête
         $sql .= " AND t.phase_id IN ($liste_in_sql)";
+    }
+    
+    // 🎯 FILTRE 2 : Barre de recherche textuelle
+    if (!empty($recherche_texte)) {
+        $recherche_sec = mysqli_real_escape_string($lien, $recherche_texte);
+        // Cherche le mot-clé n'importe où dans le texte de la tâche
+        $sql .= " AND t.texte LIKE '%$recherche_sec%'";
     }
     
     $sql .= " ORDER BY t.id ASC";
             
     return mysqli_query($lien, $sql);
 }
-
 
 /**
  * 2. Récupère les données d'une seule tâche alignées sur la nouvelle colonne (phase_id)

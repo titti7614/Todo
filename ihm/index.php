@@ -117,7 +117,12 @@ $list_phases = $projet_id ? getPhasesParProjet($lien, $projet_id) : [];
 
 // Interception des filtres multiples (Cases à cocher)
 $phases_selectionnees = (isset($_GET['phases_filtre']) && is_array($_GET['phases_filtre'])) ? $_GET['phases_filtre'] : [];
-$resultat = $projet_id ? getTachesParProjet($lien, $projet_id, $phases_selectionnees) : null;
+
+// 🎯 INTERCEPTION DE LA BARRE DE RECHERCHE TEXTUELLE
+$recherche_mot_cle = isset($_GET['recherche_texte']) ? trim($_GET['recherche_texte']) : '';
+
+// Chargement des tâches adaptées aux filtres multiples ET au mot-clé recherché
+$resultat = $projet_id ? getTachesParProjet($lien, $projet_id, $phases_selectionnees, $recherche_mot_cle) : null;
 
 // 🎯 CORRECTIF : Charge la tâche aussi bien en modification qu'en demande de suppression graphique (GET)
 $tache_a_modifier = ((isset($_GET['id_tache']) || isset($_POST['id_tache'])) && ($action === 'modification_taches' || $action === 'modification_tache' || $action === 'suppression_tache')) ? getTachePourModification($lien, isset($_GET['id_tache']) ? (int)$_GET['id_tache'] : (int)$_POST['id_tache']) : null;
