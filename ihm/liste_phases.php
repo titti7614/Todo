@@ -12,7 +12,7 @@
         <!-- 🎯 1. LA BARRE DE RECHERCHE TEXTUELLE -->
         <div style="margin-bottom: 18px; position: relative;">
             <label for="recherche_texte" style="display: block; font-weight: bold; color: #1e293b; font-size: 0.95rem; margin-bottom: 6px;">
-                🔍 Rechercher par mot-clé (ex: accises, article 60, CI...) :
+                🔍 Rechercher par mot-clé :
             </label>
             <div style="display: flex; gap: 10px;">
                 <input type="text" name="recherche_texte" id="recherche_texte" 
