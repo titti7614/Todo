@@ -13,7 +13,7 @@ if (!empty($projet_a_supprimer)) {
     <h3 style="color: #e74c3c; margin-top: 0;">⚠️ Supprimer définitivement le projet ?</h3>
     
     <p>Vous êtes sur le point de supprimer le projet : <strong style="color: #c0392b; font-size: 1.1rem;"><?php echo htmlspecialchars($nom_projet_a_supprimer, ENT_QUOTES, 'UTF-8'); ?></strong>.</p>
-    <p style="color: #e74c3c; font-weight: bold;">Attention : Cette action est irréversible. Elle supprimera automatiquement toutes les phases et toutes les tâches qui lui sont liées !</p>
+    <p style="color: #e74c3c; font-weight: bold;">Attention : Cette action est irréversible. Elle supprimera automatiquement toutes les categories et toutes les tâches qui lui sont liées !</p>
     
     <!-- CORRECTION : Le formulaire pointe vers l'index de base, l'action est passée en méthode POST sécurisée -->
     <form action="index.php" method="POST" style="margin-top: 20px;">

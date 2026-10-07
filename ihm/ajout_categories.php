@@ -1,31 +1,31 @@
 <?php
-// ihm/ajout_phases.php
+// ihm/ajout_categories.php
 // Vue passive pure : Reçoit de l'index : $projet_id
 ?>
 <div class="zone-formulaires" style="margin-top: 20px;">
     <div class="bloc-form" style="background: #fff; padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #cbd5e1;">
-        <h3>➕ Créer une nouvelle phase</h3>
+        <h3>➕ Créer une nouvelle categories</h3>
         
         <form action="index.php" method="POST">
-            <input type="hidden" name="action" value="ajout_phases">
+            <input type="hidden" name="action" value="ajout_categories">
             <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">
 
-            <!-- Champ 1 : Nom de la phase -->
+            <!-- Champ 1 : Nom de la categories -->
             <div class="form-group" style="margin-bottom: 15px;">
-                <label for="nom_phase" style="display:block; font-weight:bold; margin-bottom:5px;">Nom de la nouvelle phase :</label>
-                <input type="text" name="nom_phase" id="nom_phase" 
+                <label for="nom_categories" style="display:block; font-weight:bold; margin-bottom:5px;">Nom de la nouvelle categories :</label>
+                <input type="text" name="nom_categories" id="nom_categories" 
                        placeholder="Ex: Étape 1 : Spécifications..." 
                        required style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
 
             <!-- 🎯 NOUVEAU : Palette de couleur en quadrillage épuré (Style LibreOffice) -->
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display:block; font-weight:bold; margin-bottom:8px;">Couleur de la phase :</label>
+                <label style="display:block; font-weight:bold; margin-bottom:8px;">Couleur de la categories :</label>
                 
                 <!-- Champ caché qui transmettra la valeur sélectionnée -->
-                <input type="hidden" name="couleur_phase" id="couleur_phase" value="#e67e22">
+                <input type="hidden" name="couleur_categories" id="couleur_categories" value="#e67e22">
                 
-                <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_phase">
+                <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_categories">
                     <div data-color="#e67e22" style="background: #e67e22; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 2px #e67e22; transform: scale(1.1);" title="Orange"></div>
                     <div data-color="#34495e" style="background: #34495e; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Gris Ardoise"></div>
                     <div data-color="#2ecc71" style="background: #2ecc71; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Vert"></div>
@@ -43,7 +43,7 @@
 
             <!-- Boutons de validation -->
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" style="background: #2ecc71; color: white; padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Créer la phase</button>
+                <button type="submit" style="background: #2ecc71; color: white; padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Créer la categories</button>
                 <a href="index.php?projet_id=<?php echo (int)$projet_id; ?>&action=liste" style="display:inline-block; padding: 8px 16px; background:#7f8c8d; color:white; border-radius:4px; text-decoration:none; font-size:0.9rem; font-weight: bold;">Annuler</a>
             </div>
         </form>
@@ -52,12 +52,12 @@
 
 <script>
 // Gestion de l'activation graphique des pastilles de couleur
-document.querySelectorAll('#palette_quadrillage_phase > div').forEach(function(pastille) {
+document.querySelectorAll('#palette_quadrillage_categories > div').forEach(function(pastille) {
     pastille.addEventListener('click', function() {
         var couleur = this.getAttribute('data-color');
-        document.getElementById('couleur_phase').value = couleur;
+        document.getElementById('couleur_categories').value = couleur;
         
-        document.querySelectorAll('#palette_quadrillage_phase > div').forEach(function(p) {
+        document.querySelectorAll('#palette_quadrillage_categories > div').forEach(function(p) {
             p.style.transform = "scale(1)";
             p.style.boxShadow = "0 0 0 1px #cbd5e1";
         });

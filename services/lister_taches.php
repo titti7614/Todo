@@ -1,53 +1,57 @@
 <?php
-// services/lister_taches.php
+// services/lister_taches.php - Version V3 PDO (To-Do)
 
 /**
- * 1. Récupère les tâches d'un projet avec double filtrage, tri intelligent ET chargement du champ note (v3.0)
+ * 1. Récupère les tâches d'un projet avec double filtrage, tri intelligent ET chargement du champ note
  */
-function getTachesParProjet($lien, $projet_id, $phases_ids = [], $recherche_texte = '') {
-    $projet_id = (int)$projet_id;
+function getTachesParProjet($lien, $projet_id, $categories_id = [], $recherche_texte = '') {
+    // Tableau pour stocker les paramètres sécurisés à exécuter dans PDO
+    $params = [(int)$projet_id];
     
-    // 🎯 REQUÊTE UNIFIÉE v3.0 : Contient t.note de manière indiscutable
-    $sql = "SELECT t.id, t.texte, t.statut, t.note, p.nom AS nom_phase, p.couleur AS couleur_phase 
+    // 🎯 REQUÊTE UNIFIÉE v3.0 : Alignée sur la base de données propre (nom_categorie, couleur_categorie, categorie_id)
+    $sql = "SELECT t.id, t.texte, t.statut, t.note, p.nom_categorie AS nom_categories, p.couleur AS couleur_categories 
             FROM todo_taches t
-            LEFT JOIN todo_phases p ON t.phase_id = p.id
-            WHERE t.projet_id = $projet_id";
+            LEFT JOIN todo_categories p ON t.categorie_id = p.id
+            WHERE t.projet_id = ?";
             
-    // FILTRE 1 : Multi-phases (Cases à cocher)
-    if (!empty($phases_ids) && is_array($phases_ids)) {
-        $phases_nettoyees = array_map('intval', $phases_ids);
-        $liste_in_sql = implode(',', $phases_nettoyees);
-        $sql .= " AND t.phase_id IN ($liste_in_sql)";
+    // FILTRE 1 : Multi-catégories (Cases à cocher)
+    if (!empty($categories_id) && is_array($categories_id)) {
+        $categories_nettoyees = array_map('intval', $categories_id);
+        $points_interrogation = implode(',', array_fill(0, count($categories_nettoyees), '?'));
+        
+        $sql .= " AND t.categorie_id IN ($points_interrogation)";
+        
+        foreach ($categories_nettoyees as $cat_id) {
+            $params[] = $cat_id;
+        }
     }
     
     // FILTRE 2 : Barre de recherche textuelle
     if (!empty($recherche_texte)) {
-        $recherche_sec = mysqli_real_escape_string($lien, $recherche_texte);
-        $sql .= " AND t.texte LIKE '%$recherche_sec%'";
+        $sql .= " AND t.texte LIKE ?";
+        $params[] = '%' . $recherche_texte . '%';
     }
     
     // TRI INTELLIGENT v3.0 : En cours d'abord, puis par ID décroissant
     $sql .= " ORDER BY t.statut ASC, t.id DESC";
             
-    return mysqli_query($lien, $sql);
+    $stmt = $lien->prepare($sql);
+    $stmt->execute($params);
+    
+    return $stmt->fetchAll();
 }
 
 /**
- * 2. Récupère les données d'une seule tâche alignées sur la nouvelle colonne (phase_id)
+ * 2. Récupère les données d'une seule tâche alignées sur la nouvelle colonne (categorie_id)
  */
 function getTachePourModification($lien, $id_tache) {
-    $id_tache = (int)$id_tache;
+    // 🎯 HARMONISATION : Utilisation de la colonne propre 'categorie_id'
+    $sql = "SELECT id, projet_id, categorie_id AS categories_id, texte, statut FROM todo_taches WHERE id = ? LIMIT 1";
     
-    // 🎯 HARMONISATION : Remplacement de la colonne 'phase' obsolète par 'phase_id'
-    $sql = "SELECT id, projet_id, phase_id, texte, statut FROM todo_taches WHERE id = $id_tache LIMIT 1";
-    $resultat = mysqli_query($lien, $sql);
+    $stmt = $lien->prepare($sql);
+    $stmt->execute([(int)$id_tache]);
+    $donnees = $stmt->fetch();
     
-    if ($resultat && mysqli_num_rows($resultat) > 0) {
-        $donnees = mysqli_fetch_assoc($resultat);
-        mysqli_free_result($resultat);
-        return $donnees; // Renvoie le tableau contenant les clés lues par l'IHM
-    }
-    
-    return null;
+    return $donnees ? $donnees : null;
 }
 ?>

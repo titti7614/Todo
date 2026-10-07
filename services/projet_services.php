@@ -1,37 +1,34 @@
 <?php
-// services/projet_services.php
+// services/projet_services.php - Version V3 PDO (To-Do)
 
+/**
+ * Récupère tous les projets de l'utilisateur connecté
+ */
 function getTousProjets($lien) {
-    $projets = [];
-    $query = "SELECT id, nom_projet FROM todo_projets ORDER BY nom_projet ASC";
-    $result = mysqli_query($lien, $query);
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $projets[] = $row;
-        }
-    }
-    return $projets;
+    // SÉCURITÉ : On récupère l'ID de la personne connectée via la session du portail
+    $utilisateur_id = $_SESSION['user_id'] ?? 0;
+    
+    // On filtre STRICTEMENT pour ne pas afficher les projets du voisin
+    $query = "SELECT id, nom_projet FROM todo_projets WHERE utilisateur_id = ? ORDER BY nom_projet ASC";
+    
+    $stmt = $lien->prepare($query);
+    $stmt->execute([$utilisateur_id]);
+    
+    return $stmt->fetchAll(); // Retourne directement le tableau associatif complet
 }
 
-// function getPhasesParProjet($lien, $projet_id) {
-//     $phases = [];
-//     $projet_id = (int)$projet_id;
-//     $query = "SELECT id, nom FROM todo_phases WHERE projet_id = $projet_id ORDER BY nom ASC";
-//     $result = mysqli_query($lien, $query);
-//     if ($result) {
-//         while ($row = mysqli_fetch_assoc($result)) {
-//             $phases[] = $row;
-//         }
-//     }
-//     return $phases;
-// }
-
+/**
+ * Récupère un projet spécifique par son ID (en vérifiant qu'il appartient bien à l'utilisateur)
+ */
 function getProjetParId($lien, $projet_id) {
-    $projet_id = (int)$projet_id;
-    $query = "SELECT id, nom_projet FROM todo_projets WHERE id = $projet_id LIMIT 1";
-    $result = mysqli_query($lien, $query);
-    if ($result && mysqli_num_rows($result) > 0) {
-        return mysqli_fetch_assoc($result);
-    }
-    return null;
+    $utilisateur_id = $_SESSION['user_id'] ?? 0;
+    
+    // Double sécurité : l'ID du projet ET l'ID de l'utilisateur doivent correspondre
+    $query = "SELECT id, nom_projet FROM todo_projets WHERE id = ? AND utilisateur_id = ? LIMIT 1";
+    
+    $stmt = $lien->prepare($query);
+    $stmt->execute([$projet_id, $utilisateur_id]);
+    $projet = $stmt->fetch();
+    
+    return $projet ? $projet : null;
 }

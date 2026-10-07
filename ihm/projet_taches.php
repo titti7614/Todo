@@ -20,12 +20,12 @@ exit;
                
                         <div class="tache-item">
                             <div>
-                                <span class="badge-phase">
+                                <span class="badge-categories">
                                     <?php 
-                                    if (!empty($tache['phase']) && !is_numeric($tache['phase'])) {
-                                        echo htmlspecialchars($tache['phase']);
-                                    } elseif (isset($tab_phases[$tache['phase']])) {
-                                        echo htmlspecialchars($tab_phases[$tache['phase']]);
+                                    if (!empty($tache['categories']) && !is_numeric($tache['categories'])) {
+                                        echo htmlspecialchars($tache['categories']);
+                                    } elseif (isset($tab_categories[$tache['categories']])) {
+                                        echo htmlspecialchars($tab_categories[$tache['categories']]);
                                     } else {
                                         echo 'Général';
                                     }
