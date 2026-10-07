@@ -1,5 +1,5 @@
 <?php
-// ihm/liste_categories.php
+// ihm/liste_categories.php — VERSION STABLE V3 UNIFIÉE AVEC COULEURS DYNAMIQUES
 // Reçoit de l'index : $list_categories, $projet_id, $categories_selectionnees (tableau) et $recherche_mot_cle (chaîne)
 ?>
 <div class="zone-categories" style="margin-top: 20px; background: #f8fafc; padding: 20px; border-radius: 6px; border: 1px solid #e2e8f0;">
@@ -8,6 +8,7 @@
         <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">
         <input type="hidden" name="action" value="liste">
 
+        <!-- 1. LA BARRE DE RECHERCHE TEXTUELLE -->
         <div style="margin-bottom: 18px; position: relative;">
             <label for="recherche_texte" style="display: block; font-weight: bold; color: #1e293b; font-size: 0.95rem; margin-bottom: 6px;">
                 🔍 Rechercher par mot-clé :
@@ -34,20 +35,29 @@
         </p>
         
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
+            
+            <!-- GAUCHE : Les cases à cocher avec pastilles colorées dynamiques -->
             <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                 
                 <a href="index.php?projet_id=<?php echo (int)$projet_id; ?>&action=liste" 
-                   style="display: inline-block; padding: 6px 12px; background: <?php echo empty($categories_selectionnees) ? '#3498db' : '#cbd5e1'; ?>; color: <?php echo empty($categories_selectionnees) ? 'white' : '#475569'; ?>; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: bold; transition: all 0.2s;">
+                   style="display: inline-block; padding: 6px 12px; background: <?php echo empty($categories_selectionnees) ? '#34495e' : '#cbd5e1'; ?>; color: <?php echo empty($categories_selectionnees) ? 'white' : '#475569'; ?>; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: bold; transition: all 0.2s;">
                    🌐 Tout afficher
                 </a>
 
                 <?php if (!empty($list_categories)): ?>
                     <?php foreach ($list_categories as $categories): ?>
-                        <?php $est_coche = in_array($categories['id'], $categories_selectionnees); ?>
+                        <?php 
+                        $est_coche = in_array($categories['id'], $categories_selectionnees); 
+                        // 🎯 Extraction de la vraie couleur de la catégorie (ou gris par défaut si vide)
+                        $couleur_badge = !empty($categories['couleur']) ? $categories['couleur'] : '#7f8c8d';
+                        ?>
                         
-                        <div style="display: inline-flex; align-items: center; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid <?php echo $est_coche ? '#3498db' : '#cbd5e1'; ?>; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; box-shadow: <?php echo $est_coche ? '0 0 0 1px #3498db' : 'none'; ?>; gap: 8px;">
+                        <div style="display: inline-flex; align-items: center; background: white; padding: 4px 10px; border-radius: 4px; border: 1px solid <?php echo $est_coche ? '#3498db' : '#e2e8f0'; ?>; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; box-shadow: <?php echo $est_coche ? '0 0 0 1px #3498db' : 'none'; ?>; gap: 8px;">
                             
-                            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0;">
+                            <!-- 🎯 NOUVEAU : Petite pastille colorée qui affiche la couleur réelle de la catégorie -->
+                            <span style="display: inline-block; width: 10px; height: 10px; background-color: <?php echo $couleur_badge; ?>; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1);"></span>
+                            
+                            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; color: #334155;">
                                 <input type="checkbox" name="categories_filtre[]" value="<?php echo (int)$categories['id']; ?>" 
                                        <?php echo $est_coche ? 'checked' : ''; ?>
                                        onchange="document.getElementById('form_filtre_multi').submit();"
@@ -55,7 +65,7 @@
                                     <?php echo htmlspecialchars($categories['nom_categorie'], ENT_QUOTES, 'UTF-8'); ?>
                             </label>
 
-                            <span style="color: #e2e8f0; font-size: 0.8rem;">|</span>
+                            <span style="color: #f1f5f9; font-size: 0.8rem;">|</span>
 
                             <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=modification_categories&categories_id=<?php echo $categories['id']; ?>" 
                                title="Modifier cette catégorie" 
@@ -77,6 +87,7 @@
                 <?php endif; ?>
             </div>
 
+            <!-- DROITE : Bouton d'administration pour créer une catégorie seule -->
             <div style="display: flex; gap: 8px; align-items: center;">
                 <a href="index.php?projet_id=<?php echo (int)$projet_id; ?>&action=ajout_categories" 
                    title="Créer une nouvelle catégorie" 

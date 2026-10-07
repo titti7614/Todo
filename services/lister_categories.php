@@ -1,14 +1,14 @@
 <?php
-// services/lister_categories.php - Version V3 PDO (To-Do)
+// services/lister_categories.php - Version V3 PDO (To-Do - FIX Pastilles Couleurs)
 
 /**
- * 1. Récupère toutes les catégories uniques rattachées à un projet appartenant à l'utilisateur
+ * 1. Récupère toutes les catégories uniques rattachées à un projet (Avec couleur)
  */
 function getcategoriesParProjet($lien, $projet_id) {
     $utilisateur_id = $_SESSION['user_id'] ?? 1;
     
-    // Jointure de sécurité avec la table des projets pour s'assurer de l'appartenance de la donnée
-    $sql = "SELECT c.id, c.nom_categorie 
+    // 🎯 FIX : Ajout de c.couleur dans le SELECT pour alimenter l'IHM
+    $sql = "SELECT c.id, c.nom_categorie, c.couleur 
             FROM todo_categories c
             INNER JOIN todo_projets p ON c.projet_id = p.id
             WHERE c.projet_id = ? AND p.utilisateur_id = ? 
@@ -21,12 +21,13 @@ function getcategoriesParProjet($lien, $projet_id) {
 }
 
 /**
- * 2. Récupère les données d'une seule catégorie pour modification (Filtrée par Utilisateur)
+ * 2. Récupère les données d'une seule catégorie pour modification (Avec couleur)
  */
 function getcategoriesPourModification($lien, $categories_id) {
     $utilisateur_id = $_SESSION['user_id'] ?? 1;
     
-    $sql = "SELECT c.id, c.nom_categorie, c.projet_id 
+    // 🎯 FIX : Ajout de c.couleur ici aussi pour pré-remplir le quadrillage lors de l'édition
+    $sql = "SELECT c.id, c.nom_categorie, c.couleur, c.projet_id 
             FROM todo_categories c
             INNER JOIN todo_projets p ON c.projet_id = p.id
             WHERE c.id = ? AND p.utilisateur_id = ? 
