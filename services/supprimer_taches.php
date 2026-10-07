@@ -2,27 +2,35 @@
 // services/supprimer_taches.php - Version V3 PDO (To-Do)
 // Script logique pure - Aucun code HTML
 
-// Récupération sécurisée en POST suite à la validation sur l'écran d'avertissement rouge
-$projet_id = isset($_POST['projet_id']) ? (int)$_POST['projet_id'] : 0;
-$id_tache  = isset($_POST['id_tache']) ? (int)$_POST['id_tache'] : 0;
+$projet_id      = isset($_POST['projet_id']) ? (int)$_POST['projet_id'] : 0;
+$id_tache       = isset($_POST['id_tache']) ? (int)$_POST['id_tache'] : 0;
+$utilisateur_id = $_SESSION['user_id'] ?? 1;
+$role           = $_SESSION['mes_apps_cache']['todo'] ?? 'user';
 
 if ($id_tache > 0 && $projet_id > 0) {
-    // Suppression physique sécurisée par requête préparée PDO
-    $sql_delete = "DELETE FROM todo_taches WHERE id = ? AND projet_id = ?";
+    if ($role === 'admin') {
+        // L'admin supprime n'importe quelle tâche du projet
+        $sql = "DELETE FROM todo_taches WHERE id = ? AND projet_id = ?";
+        $params = [$id_tache, $projet_id];
+    } else {
+        // L'user ne peut supprimer que sa tâche
+        $sql = "DELETE FROM todo_taches WHERE id = ? AND projet_id = ? AND utilisateur_id = ?";
+        $params = [$id_tache, $projet_id, $utilisateur_id];
+    }
     
     try {
-        $stmt = $lien->prepare($sql_delete);
-        $stmt->execute([$id_tache, $projet_id]);
+        $stmt = $lien->prepare($sql);
+        $stmt->execute($params);
         
+        // Confirmation sémantique pour le bandeau vert
         $_SESSION['succes_projet'] = "La tâche a été supprimée avec succès !";
     } catch (PDOException $e) {
-        $_SESSION['erreur_projet'] = "Erreur technique lors de la suppression de la tâche : " . $e->getMessage();
+        $_SESSION['erreur_projet'] = "Erreur technique lors de la suppression : " . $e->getMessage();
     }
 } else {
     $_SESSION['erreur_projet'] = "Données insuffisantes pour supprimer la tâche.";
 }
 
-// Redirection propre vers le routeur racine local
-header("Location: http://localhost:8000/index.php?projet_id=" . $projet_id . "&action=liste");
+header("Location: index.php?projet_id=" . $projet_id . "&action=liste");
 exit();
 ?>

@@ -9,41 +9,36 @@
         <input type="hidden" name="action" value="ajout_taches">
         <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">
 
-        <!-- 1. Libellé de la tâche -->
         <div style="margin-bottom: 15px;">
             <label for="texte_tache" style="display: block; font-weight: bold; margin-bottom: 5px;">Texte de la tâche :</label>
             <input type="text" name="texte_tache" id="texte_tache" required placeholder="Ex: Rédiger le cahier des charges..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
         </div>
 
-        <!-- 2. Sélection de categories existante -->
         <div id="zone_select_categories" style="margin-bottom: 15px;">
-            <label for="categories_id" style="display: block; font-weight: bold; margin-bottom: 5px;">Associer à une categories :</label>
+            <label for="categories_id" style="display: block; font-weight: bold; margin-bottom: 5px;">Associer à une catégorie :</label>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <select name="categories_id" id="categories_id" style="flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; height: 38px;">
-                    <option value="0">-- Sélectionner une categories existante (Général) --</option>
+                    <option value="0">-- Sélectionner une catégorie existante (Général) --</option>
                     <?php if (!empty($list_categories)): ?>
                         <?php foreach ($list_categories as $categories): ?>
                             <option value="<?php echo (int)$categories['id']; ?>">
-                                <?php echo htmlspecialchars($categories['nom'], ENT_QUOTES, 'UTF-8'); ?>
+                                <?php echo htmlspecialchars($categories['nom_categorie'], ENT_QUOTES, 'UTF-8'); ?>
                             </option>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </select>
-                <button type="button" id="btn_declencher_categories_ajout" title="Créer une nouvelle categories" style="width: 35px; height: 35px; background: #2ecc71; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 1.2rem; cursor: pointer;">+</button>
+                <button type="button" id="btn_declencher_categories_ajout" title="Créer une nouvelle catégorie" style="width: 35px; height: 35px; background: #2ecc71; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 1.2rem; cursor: pointer;">+</button>
             </div>
         </div>
 
-        <!-- 3. Champ masqué pour créer la categories à la volée avec le quadrillage -->
         <div id="bloc_nouvelle_categories_ajout" style="display: none; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-left: 4px solid #2ecc71; border-radius: 4px;">
             <div style="margin-bottom: 12px;">
-                <label for="nouveau_nom_categories" style="display: block; font-weight: bold; margin-bottom: 5px; color: #27ae60;">Nom de la nouvelle categories :</label>
+                <label for="nouveau_nom_categories" style="display: block; font-weight: bold; margin-bottom: 5px; color: #27ae60;">Nom de la nouvelle catégorie :</label>
                 <input type="text" name="nouveau_nom_categories" id="nouveau_nom_categories" placeholder="Ex: Spécifications, Design..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
             
-            <!-- Quadrillage pastilles de couleur -->
             <div>
-                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #27ae60;">Couleur de la categories :</label>
-                <!-- 🎯 FIX HIERARCHIE : L'ID est unique et le NAME est exactement synchronisé avec le POST PHP -->
+                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #27ae60;">Couleur de la catégorie :</label>
                 <input type="hidden" name="nouvelle_couleur_categories" id="nouvelle_couleur_categories_ajout" value="#e67e22">
                 
                 <div style="display: grid; grid-template-columns: repeat(6, 35px); gap: 8px; width: max-content;" id="palette_quadrillage_ajout">
@@ -61,10 +56,9 @@
                     <div data-color="#27ae60" style="background: #27ae60; width: 35px; height: 35px; border-radius: 4px; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1;" title="Vert Foncé"></div>
                 </div>
             </div>
-            <small style="color: #7f8c8d; display: block; margin-top: 8px;">La categories sera créée et la tâche lui sera rattachée automatiquement.</small>
+            <small style="color: #7f8c8d; display: block; margin-top: 8px;">La catégorie sera créée et la tâche lui sera rattachée automatiquement.</small>
         </div>
 
-        <!-- Validations -->
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button type="submit" style="background: #3498db; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Enregistrer la tâche</button>
             <a href="index.php?projet_id=<?php echo (int)$projet_id; ?>&action=liste" style="background: #95a5a6; color: white; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: bold;">Annuler</a>
@@ -73,7 +67,6 @@
 </div>
 
 <script>
-// Menu déroulant <=> champ masqué
 document.getElementById('btn_declencher_categories_ajout').addEventListener('click', function(e) {
     e.preventDefault();
     var bloc = document.getElementById('bloc_nouvelle_categories_ajout');
@@ -92,7 +85,6 @@ document.getElementById('btn_declencher_categories_ajout').addEventListener('cli
     }
 });
 
-// 🎯 FIX DE L'ÉCOUTEUR JS : Ciblage strict des enfants du conteneur unique de ce fichier
 document.querySelectorAll('#palette_quadrillage_ajout > div').forEach(function(pastille) {
     pastille.addEventListener('click', function() {
         var couleur = this.getAttribute('data-color');

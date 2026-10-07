@@ -1,0 +1,3 @@
+# 🔒 Verrouillage absolu du dossier logs
+# Bloque l'accès public depuis le web, mais laisse PHP écrire dedans
+Require all denied

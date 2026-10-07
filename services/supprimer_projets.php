@@ -1,8 +1,6 @@
 <?php
 // services/supprimer_projets.php - Version V3 PDO (To-Do)
 
-// Comme ce script est inclus par l'index.php, la session est active et les variables $lien et $projet_id existent déjà.
-
 if (isset($_POST['confirmer_suppression']) && $projet_id > 0) {
     // SÉCURITÉ MULTI-USER : On intercepte l'ID de l'utilisateur connecté
     $utilisateur_id = $_SESSION['user_id'] ?? 1;
@@ -16,9 +14,9 @@ if (isset($_POST['confirmer_suppression']) && $projet_id > 0) {
         if ($stmt_check->fetch()) {
             // L'utilisateur est bien le propriétaire : on lance la suppression en cascade sécurisée
             
-            // Suppression des tâches liées au projet
-            $stmt_taches = $lien->prepare("DELETE FROM todo_taches WHERE projet_id = ?");
-            $stmt_taches->execute([$projet_id]);
+            // Suppression des tâches liées au projet et à cet utilisateur spécifique
+            $stmt_taches = $lien->prepare("DELETE FROM todo_taches WHERE projet_id = ? AND utilisateur_id = ?");
+            $stmt_taches->execute([$projet_id, $utilisateur_id]);
             
             // Suppression des catégories liées au projet
             $stmt_categories = $lien->prepare("DELETE FROM todo_categories WHERE projet_id = ?");
@@ -33,18 +31,17 @@ if (isset($_POST['confirmer_suppression']) && $projet_id > 0) {
             $_SESSION['erreur_projet'] = "Action non autorisée : ce projet ne vous appartient pas.";
         }
         
-        // 2. Redirection propre : l'entonnoir revient à zéro
-        header("Location: http://localhost:8000/index.php?action=liste");
+        // Redirection relative adaptative
+        header("Location: index.php?action=liste");
         exit();
         
     } catch (PDOException $e) {
         $_SESSION['erreur_projet'] = "Erreur technique SQL lors de la suppression : " . $e->getMessage();
-        header("Location: http://localhost:8000/index.php?projet_id=" . $projet_id . "&action=liste");
+        header("Location: index.php?projet_id=" . $projet_id . "&action=liste");
         exit();
     }
 }
 
-// Sécurité : si on arrive ici sans POST, on retourne simplement à la liste
-header("Location: http://localhost:8000/index.php?projet_id=" . $projet_id . "&action=liste");
+header("Location: index.php?projet_id=" . $projet_id . "&action=liste");
 exit();
 ?>

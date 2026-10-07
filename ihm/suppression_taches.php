@@ -17,7 +17,6 @@
             Attention : Cette action est irréversible. L'historique et le statut de cette tâche seront définitivement effacés de votre plan.
         </p>
         
-        <!-- Formulaire de validation finale en POST sécurisé -->
         <form action="index.php" method="POST" style="display: flex; gap: 12px; margin: 0;">
             <input type="hidden" name="action" value="suppression_tache_confirmee">
             <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">

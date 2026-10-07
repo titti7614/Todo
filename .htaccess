@@ -1,0 +1,14 @@
+# ----------------------------------------------------------------------
+# SÉCURISATION DE L'APPLICATION TO-DO V3
+# ----------------------------------------------------------------------
+
+# 1. Interdire aux navigateurs de lister le contenu des dossiers (ex: taper /services/)
+Options -Indexes
+
+# 2. Bloquer l'accès direct aux fichiers de configuration sensibles
+<FilesMatch "^\.(htaccess|git)">
+    Require all denied
+</FilesMatch>
+
+# 3. Forcer l'encodage universel UTF-8
+AddDefaultCharset UTF-8
