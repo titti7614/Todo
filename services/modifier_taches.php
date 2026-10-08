@@ -1,80 +1,73 @@
 <?php
-// services/modifier_taches.php - Version V3 PDO Multi-User (Double Verrou Sécurité)
-// Script logique pure - Aucun code HTML
+// services/modification_taches.php - Version Sécurisée Anti-Bug
 
+$tache_id               = isset($_POST['tache_id']) ? (int)$_POST['tache_id'] : 0;
 $projet_id              = isset($_POST['projet_id']) ? (int)$_POST['projet_id'] : 0;
-$id_tache               = isset($_POST['id_tache']) ? (int)$_POST['id_tache'] : 0;
 $texte_tache            = isset($_POST['texte_tache']) ? trim($_POST['texte_tache']) : '';
-$categories_id          = isset($_POST['categories_id']) ? (int)$_POST['categories_id'] : 0;
-$nouveau_nom_categories = isset($_POST['nouveau_nom_categories']) ? trim($_POST['nouveau_nom_categories']) : '';
-$nouvelle_couleur       = isset($_POST['nouvelle_couleur_categories']) ? trim($_POST['nouvelle_couleur_categories']) : '#34495e';
+$date_echeance          = (!empty($_POST['date_echeance'])) ? trim($_POST['date_echeance']) : null;
+$statut                 = isset($_POST['statut']) ? (int)$_POST['statut'] : 0;
+
+// 🎯 FUSION DE SÉCURITÉ : On intercepte les deux orthographes possibles (avec ou sans S)
+$categories_ids = [];
+if (isset($_POST['categories_ids']) && is_array($_POST['categories_ids'])) {
+    $categories_ids = $_POST['categories_ids'];
+} elseif (isset($_POST['categories_id']) && is_array($_POST['categories_id'])) {
+    $categories_ids = $_POST['categories_id'];
+}
 
 $utilisateur_id = $_SESSION['user_id'] ?? 1;
 $role           = $_SESSION['mes_apps_cache']['todo'] ?? 'user';
 
-if ($id_tache > 0 && $projet_id > 0 && !empty($texte_tache)) {
+if ($tache_id > 0 && !empty($texte_tache)) {
     
-    // VERIFICATION DE SECURITE NIVEAU 2 : Le projet ciblé appartient-il bien à l'utilisateur connecté ?
     if ($role === 'admin') {
-        $stmt_verif_proj = $lien->prepare("SELECT id FROM todo_projets WHERE id = ? LIMIT 1");
-        $stmt_verif_proj->execute([$projet_id]);
+        $stmt_verif = $lien->prepare("SELECT id FROM todo_taches WHERE id = ? LIMIT 1");
+        $stmt_verif->execute([$tache_id]);
     } else {
-        $stmt_verif_proj = $lien->prepare("SELECT id FROM todo_projets WHERE id = ? AND utilisateur_id = ? LIMIT 1");
-        $stmt_verif_proj->execute([$projet_id, $utilisateur_id]);
+        $stmt_verif = $lien->prepare("SELECT id FROM todo_taches WHERE id = ? AND utilisateur_id = ? LIMIT 1");
+        $stmt_verif->execute([$tache_id, $utilisateur_id]);
     }
-    
-    if ($stmt_verif_proj->fetch()) {
-        
-        // ÉTAPE 1 : Si l'utilisateur a créé une nouvelle catégorie à la volée via le bouton "+"
-        if (!empty($nouveau_nom_categories)) {
-            $sql_check_categories = "SELECT id FROM todo_categories WHERE nom_categorie = ? AND projet_id = ? LIMIT 1";
-            $stmt_check = $lien->prepare($sql_check_categories);
-            $stmt_check->execute([$nouveau_nom_categories, $projet_id]);
-            $row_categories = $stmt_check->fetch();
-            
-            if ($row_categories) {
-                $categories_id = (int)$row_categories['id'];
-            } else {
-                $sql_insert_categories = "INSERT INTO todo_categories (projet_id, nom_categorie, couleur) VALUES (?, ?, ?)";
-                $stmt_insert = $lien->prepare($sql_insert_categories);
+
+    if ($stmt_verif->fetch()) {
+        try {
+            $lien->beginTransaction();
+
+            // 1. Mise à jour de la tâche
+            $sql_up = "UPDATE todo_taches SET texte = ?, statut = ?, date_echeance = ? WHERE id = ?";
+            $lien->prepare($sql_up)->execute([$texte_tache, $statut, $date_echeance, $tache_id]);
+
+            // 2. Nettoyage complet
+            $sql_del_pivot = "DELETE FROM todo_tache_categories WHERE tache_id = ?";
+            $lien->prepare($sql_del_pivot)->execute([$tache_id]);
+
+            // 3. Réinsertion des multi-catégories
+            if (!empty($categories_ids)) {
+                $categories_ids = array_unique(array_map('intval', $categories_ids));
                 
-                if ($stmt_insert->execute([$projet_id, $nouveau_nom_categories, $nouvelle_couleur])) {
-                    $categories_id = (int)$lien->lastInsertId();
+                $sql_ins_pivot = "INSERT INTO todo_tache_categories (tache_id, categorie_id) VALUES (?, ?)";
+                $stmt_pivot = $lien->prepare($sql_ins_pivot);
+
+                foreach ($categories_ids as $cat_id) {
+                    if ($cat_id > 0) {
+                        $stmt_pivot->execute([$tache_id, $cat_id]);
+                    }
                 }
             }
-        }
 
-        // ÉTAPE 2 : Mise à jour SQL de la TÂCHE avec double gestion des rôles et des colonnes doublons
-        if ($role === 'admin') {
-            // L'admin peut modifier n'importe quelle tâche du projet
-            $sql_update_tache = "UPDATE todo_taches 
-                                 SET texte = ?, categorie_id = ? 
-                                 WHERE id = ? AND projet_id = ?";
-            $params = [$texte_tache, $categories_id, $id_tache, $projet_id];
-        } else {
-            // L'user standard est contraint par son identifiant sur les DEUX colonnes pour éviter tout conflit
-            $sql_update_tache = "UPDATE todo_taches 
-                                 SET texte = ?, categorie_id = ? 
-                                 WHERE id = ? AND projet_id = ? AND (utilisateur_id = ? OR user_id = ?)";
-            $params = [$texte_tache, $categories_id, $id_tache, $projet_id, $utilisateur_id, $utilisateur_id];
-        }
-                         
-        try {
-            $stmt_update = $lien->prepare($sql_update_tache);
-            $stmt_update->execute($params);
-            
-            $_SESSION['succes_projet'] = "La tâche a été modifiée avec succès !";
+            $lien->commit();
+            $_SESSION['succes_projet'] = "Tâche mise à jour avec succès !";
+
         } catch (PDOException $e) {
-            $_SESSION['erreur_projet'] = "Erreur lors de la modification de la tâche : " . $e->getMessage();
+            $lien->rollBack();
+            $_SESSION['erreur_projet'] = "Erreur technique lors de la modification : " . $e->getMessage();
         }
     } else {
-        $_SESSION['erreur_projet'] = "Accès refusé : Action non autorisée sur ce projet.";
+        $_SESSION['erreur_projet'] = "Accès refusé : Action non autorisée.";
     }
 } else {
-    $_SESSION['erreur_projet'] = "Données du formulaire invalides ou incomplètes.";
+    $_SESSION['erreur_projet'] = "Le libellé de la tâche ne peut pas être vide.";
 }
 
-// Redirection relative adaptative Prod
 header("Location: index.php?projet_id=" . $projet_id . "&action=liste");
 exit();
 ?>

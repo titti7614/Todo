@@ -11,8 +11,8 @@ if (session_status() === PHP_SESSION_NONE) {
 // Pour développer sur votre Mac : Supprimez les " // " des 3 lignes ci-dessous.
 // Pour la production o2switch : Laissez les " // " pour bloquer l'accès.
 // ======================================================================
-// $_SESSION['user_id'] = 1; 
-// $_SESSION['mes_apps_cache']['todo'] = 'admin'; // 'admin' ou 'user'
+$_SESSION['user_id'] = 1; 
+$_SESSION['mes_apps_cache']['todo'] = 'admin'; // 'admin' ou 'user'
 // ======================================================================
 
 // 🛡️ BARRIÈRE DE SÉCURITÉ INTER-DOSSIERS STRICTE (Production will-apps.fr)
@@ -167,13 +167,16 @@ $resultat = $projet_id ? getTachesParProjet($lien, $projet_id, $categories_selec
 
 $tache_a_modifier = ((isset($_GET['id_tache']) || isset($_POST['id_tache'])) && ($action === 'modification_taches' || $action === 'modification_tache' || $action === 'suppression_tache')) ? getTachePourModification($lien, isset($_GET['id_tache']) ? (int)$_GET['id_tache'] : (int)$_POST['id_tache']) : null;
 
+// 🎯 Liaison pour l'IHM : On alimente $tache attendu par la vue de modification
+$tache = $tache_a_modifier;
+
 $categories_id_contexte = isset($_REQUEST['categories_id']) ? (int)$_REQUEST['categories_id'] : 0;
 $categories_a_modifier = (($action === 'modification_categories' || $action === 'suppression_categories') && $categories_id_contexte > 0 && function_exists('getcategoriesPourModification')) ? getcategoriesPourModification($lien, $categories_id_contexte) : null;
 
 $projet_a_supprimer = ($action === 'suppression_projets' && $projet_id > 0) ? getProjetParId($lien, $projet_id) : null;
 $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? getProjetParId($lien, $projet_id) : null;
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -192,11 +195,11 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
         <div class="selector-section" style="display: flex; align-items: center; gap: 10px;">
             
             <a href="index.php?projet_id=0&action=liste" 
-   title="Réinitialiser les filtres et revenir à la liste complète" 
-   style="display: inline-flex; align-items: center; justify-content: center; background: #34495e; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; height: 32px; box-sizing: border-box; transition: background 0.2s;"
-   onmouseover="this.style.background='#2c3e50'" onmouseout="this.style.background='#34495e'">
-   🏠 Accueil
-</a>
+               title="Réinitialiser les filtres et revenir à la liste complète" 
+               style="display: inline-flex; align-items: center; justify-content: center; background: #34495e; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; height: 32px; box-sizing: border-box; transition: background 0.2s;"
+               onmouseover="this.style.background='#2c3e50'" onmouseout="this.style.background='#34495e'">
+               🏠 Accueil
+            </a>
 
             <label for="proj_select"><strong>Projet actif :</strong></label>
             <select id="proj_select" onchange="window.location.href='index.php?projet_id='+this.value;" style="padding: 5px; min-width: 200px; height: 32px;">
