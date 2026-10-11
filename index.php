@@ -1,5 +1,7 @@
 <?php
-// index.php (Application To-Do V3 — SÉCURITÉ PRODUCTION) — PARTIE 1
+// index.php — Contrôleur Principal Central Todo (Architecture V3 Production)
+define('VERSION_APP', '3.0.1'); // 🎯 Centralisation de la version
+
 
 // 1. INITIALISATION DE L'ÉCOUTEUR DE SESSION GLOBAL DE LA PLATEFORME
 if (session_status() === PHP_SESSION_NONE) {
@@ -187,8 +189,8 @@ $projet_a_modifier = ($action === 'modification_projets' && $projet_id > 0) ? ge
 <body>
 <div class="container" style="position: relative;">
     <div style="position: absolute; top: 10px; right: 10px; background: #2ecc71; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-        v3.0
-    </div>
+    v<?php echo VERSION_APP; ?>
+</div>
     <h1>📋 Central To-Do Multi-Projets</h1>
     <!-- Barre supérieure : Sélection et création de projet -->
     <div class="selector-box" style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
