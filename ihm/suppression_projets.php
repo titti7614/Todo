@@ -1,19 +1,17 @@
 <?php
-// ihm/suppression_projets.php
-$nom_projet_a_supprimer = !empty($projet_a_supprimer) ? $projet_a_supprimer['nom_projet'] : "Projet inconnu";
+// ihm/suppression_projets.php - Écran de confirmation de destruction V4
 ?>
-<div class="container" style="border: 2px solid #e74c3c; padding: 20px; border-radius: 8px; margin-top: 20px; background-color: #fff5f5;">
-    <h3 style="color: #e74c3c; margin-top: 0;">⚠️ Supprimer définitivement le projet ?</h3>
-    <p>Vous êtes sur le point de supprimer le projet : <strong style="color: #c0392b; font-size: 1.1rem;"><?php echo htmlspecialchars($nom_projet_a_supprimer, ENT_QUOTES, 'UTF-8'); ?></strong>.</p>
-    <p style="color: #e74c3c; font-weight: bold;">Attention : Cela détruira toutes ses catégories et tâches associées !</p>
-    
-    <form action="index.php" method="POST" style="margin-top: 20px;">
-        <input type="hidden" name="action" value="suppression_projets">
+<div class="form-zone" style="margin-top: 20px; background: #fff; padding: 25px; border-radius: 4px; border: 1px solid #f5c6cb; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <h3 style="color: #c0392b; margin-top: 0;">⚠️ Confirmation de suppression définitive</h3>
+    <p>Vous êtes sur le point de détruire le projet actif ainsi que <strong>toutes les tâches, catégories, historiques et partages d'équipe</strong> qui lui sont associés.</p>
+    <p style="font-weight: bold; color: #721c24; background: #f8d7da; padding: 10px; border-radius: 4px; border-left: 4px solid #dc2626;">Cette action est irréversible. Confirmez-vous la suppression ?</p>
+
+    <!-- Le formulaire POST qui va réveiller le service réaligné -->
+    <form action="index.php" method="POST" style="margin-top: 20px; display: flex; gap: 10px;">
+        <input type="hidden" name="action" value="suppression_projets_valide">
         <input type="hidden" name="projet_id" value="<?php echo (int)$projet_id; ?>">
-        <input type="hidden" name="confirmer_suppression" value="1">
-        <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn-danger" style="background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Oui, supprimer tout</button>
-            <a href="index.php?projet_id=<?php echo (int)$projet_id; ?>&action=liste" style="padding: 10px 20px; background: #7f8c8d; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Annuler</a>
-        </div>
+        
+        <button type="submit" style="background: #c0392b; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">🗑️ Oui, supprimer définitivement</button>
+        <a href="index.php?projet_id=<?php echo $projet_id; ?>&action=liste" style="background: #95a5a6; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: bold; display: inline-flex; align-items: center;">Annuler</a>
     </form>
 </div>

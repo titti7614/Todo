@@ -1,38 +1,51 @@
 <?php
-// services/ajouter_projets.php - Version V3 PDO (To-Do)
+// services/ajouter_projets.php — Version V4.0.0 Collaborative Pure MVC (Livraison Officielle)
 
-if (isset($_POST['ajouter_projet']) && !empty(trim($_POST['nom_projet']))) {
-    $nom_projet = trim($_POST['nom_projet']);
-    
-    // SÉCURITÉ MULTI-USER : Utilisation stricte de l'ID authentifié par le portail
-    $utilisateur_id = $_SESSION['user_id'] ?? 1;
-    
-    // 1. On vérifie si ce projet existe déjà UNIQUEMENT POUR CET UTILISATEUR
-    $query_check = "SELECT id FROM todo_projets WHERE nom_projet = ? AND utilisateur_id = ? LIMIT 1";
-    $stmt_check = $lien->prepare($query_check);
-    $stmt_check->execute([$nom_projet, $utilisateur_id]);
-    $row = $stmt_check->fetch();
-    
-    if ($row) {
-        $id_existant = $row['id'];
-        $nom_encode = urlencode($nom_projet);
-        
-        // Redirection relative corrigée
-        header("Location: index.php?action=choix_doublon&dup_id=" . $id_existant . "&dup_nom=" . $nom_encode);
-        exit();
-    } else {
-        // Le nom est libre pour cet utilisateur, création avec liaison de l'utilisateur_id
-        $query_insert = "INSERT INTO todo_projets (nom_projet, utilisateur_id) VALUES (?, ?)";
-        $stmt_insert = $lien->prepare($query_insert);
-        
-        if ($stmt_insert->execute([$nom_projet, $utilisateur_id])) {
-            $nouveau_id = $lien->lastInsertId();
-            
-            header("Location: index.php?projet_id=" . $nouveau_id . "&action=liste");
-            exit();
-        }
-    }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-header("Location: index.php?action=liste");
+// 🛡️ Barrière de sécurité de session globale
+if (!isset($_SESSION['user_id']) || !isset($lien)) {
+    header("Location: index.php");
+    exit();
+}
+
+$id_session_user = (int)$_SESSION['user_id'];
+
+// Extraction et nettoyage des données POST
+$nom_projet = isset($_POST['nom_projet']) ? trim($_POST['nom_projet']) : '';
+// 🎯 Nouveauté V4.0.0 : Récupération du cercle sélectionné (optionnel si projet solo)
+$groupe_id  = (!empty($_POST['groupe_id_selectionne']) && (int)$_POST['groupe_id_selectionne'] > 0) ? (int)$_POST['groupe_id_selectionne'] : null;
+
+if (!empty($nom_projet)) {
+    try {
+        // 1. Double détection anti-doublon sémantique sur le nom du projet
+        $stmt_verif = $lien->prepare("SELECT id FROM todo_projets WHERE nom_projet = ? AND utilisateur_id = ? LIMIT 1");
+        $stmt_verif->execute([$nom_projet, $id_session_user]);
+        
+        if ($stmt_verif->fetch()) {
+            $_SESSION['erreur_projet'] = "Un projet portant exactement le même nom existe déjà dans votre espace.";
+        } else {
+            // 2. 🛡️ Insertion sécurisée avec injection du verrou de Groupe ID de la V4.0.0
+            $sql = "INSERT INTO todo_projets (nom_projet, utilisateur_id, groupe_id) VALUES (?, ?, ?)";
+            $stmt = $lien->prepare($sql);
+            $stmt->execute([$nom_projet, $id_session_user, $groupe_id]);
+            
+            $nouveau_projet_id = $lien->lastInsertId();
+            
+            $_SESSION['succes_projet'] = "Le nouveau projet collaboratif a été créé avec succès.";
+            
+            // Redirection immédiate sur le projet fraîchement créé pour fluidifier l'IHM
+            header("Location: index.php?projet_id=" . $nouveau_projet_id . "&action=liste");
+            exit();
+        }
+    } catch (PDOException $e) {
+        $_SESSION['erreur_projet'] = "Erreur technique SQL lors de la création : " . $e->getMessage();
+    }
+} else {
+    $_SESSION['erreur_projet'] = "Veuillez renseigner un nom de projet valide.";
+}
+
+header("Location: index.php?projet_id=0&action=liste");
 exit();

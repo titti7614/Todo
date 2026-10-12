@@ -14,6 +14,20 @@
             <label for="texte_tache" style="display: block; font-weight: bold; margin-bottom: 5px;">Texte de la tâche :</label>
             <input type="text" name="texte_tache" id="texte_tache" required placeholder="Ex: Créer une fonctionnalité permettant de mettre un dèlai..." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;">
         </div>
+<!-- 1B. Attribution Collaborative (Nouveauté V4.0.0) -->
+<div style="margin-bottom: 15px;">
+    <label for="attribue_a" style="display: block; font-weight: bold; margin-bottom: 5px;">👤 Assigner la tâche à :</label>
+    <select name="attribue_a" id="attribue_a" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; height: 38px; box-sizing: border-box; font-family: inherit;">
+        <option value="" selected>-- Laisser non assignée (Outil personnel) --</option>
+        <?php if (!empty($list_utilisateurs)): ?>
+            <?php foreach ($list_utilisateurs as $user): ?>
+                <option value="<?php echo (int)$user['id']; ?>">
+                    👤 <?php echo htmlspecialchars($user['nom'], ENT_QUOTES, 'UTF-8'); ?>
+                </option>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </select>
+</div>
 
         <!-- 2. Sélection Multi-Catégories (Cases à cocher horizontales) -->
         <div id="zone_select_categories" style="margin-bottom: 15px;">
